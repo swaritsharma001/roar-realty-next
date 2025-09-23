@@ -55,7 +55,7 @@ export function PropertyFilters({ filters, setFilters, onFilterSubmit, onClearFi
               value={filters.location}
               onValueChange={(value) => {
                 setFilters({ ...filters, location: value });
-                onFilterSubmit({ ...filters, location: value });
+               // onFilterSubmit({ ...filters, location: value });
               }}
             >
               <SelectTrigger>
@@ -80,7 +80,7 @@ export function PropertyFilters({ filters, setFilters, onFilterSubmit, onClearFi
               value={filters.minPrice}
               onChange={(e) => {
                 setFilters({ ...filters, minPrice: e.target.value });
-                onFilterSubmit({ ...filters, minPrice: e.target.value });
+               // onFilterSubmit({ ...filters, minPrice: e.target.value });
               }}
             />
           </div>
@@ -95,7 +95,7 @@ export function PropertyFilters({ filters, setFilters, onFilterSubmit, onClearFi
               value={filters.maxPrice}
               onChange={(e) => {
                 setFilters({ ...filters, maxPrice: e.target.value });
-                onFilterSubmit({ ...filters, maxPrice: e.target.value });
+              //  onFilterSubmit({ ...filters, maxPrice: e.target.value });
               }}
             />
           </div>
@@ -109,7 +109,7 @@ export function PropertyFilters({ filters, setFilters, onFilterSubmit, onClearFi
               value={filters.developer}
               onValueChange={(value) => {
                 setFilters({ ...filters, developer: value });
-                onFilterSubmit({ ...filters, developer: value });
+               // onFilterSubmit({ ...filters, developer: value });
               }}
             >
               <SelectTrigger>
@@ -163,7 +163,7 @@ export function PropertyFilters({ filters, setFilters, onFilterSubmit, onClearFi
               value={filters.sale_status}
               onValueChange={(value) => {
                 setFilters({ ...filters, sale_status: value });
-                onFilterSubmit({ ...filters, sale_status: value });
+                //onFilterSubmit({ ...filters, sale_status: value });
               }}
             >
               <SelectTrigger>
@@ -187,7 +187,7 @@ export function PropertyFilters({ filters, setFilters, onFilterSubmit, onClearFi
               value={filters.area}
               onChange={(e) => {
                 setFilters({ ...filters, area: e.target.value });
-                onFilterSubmit({ ...filters, area: e.target.value });
+               // onFilterSubmit({ ...filters, area: e.target.value });
               }}
             />
           </div>

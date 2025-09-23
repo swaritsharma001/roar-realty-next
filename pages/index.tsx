@@ -82,7 +82,9 @@ const Home = ({ initialPageData, initialTeamMembers, initialFeaturedProperties, 
 
     // Redirect to properties page with filters
     const filterUrl = `/properties${query.toString() ? `?${query.toString()}` : ''}`
-    router.push(filterUrl)
+    window.location.href = filterUrl
+   // wind
+    //router.push(filterUrl)
   }
 
   const clearFilters = () => {
