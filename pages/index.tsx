@@ -1,10 +1,10 @@
 import { useState } from "react"
 import { GetServerSideProps } from 'next'
+import { useRouter } from 'next/router'
 import Head from 'next/head'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Header } from "@/components/Header"
-
 import { PropertyFilters } from "@/components/PropertyFilters"
 import { PropertyCard } from "@/components/PropertyCard"
 import { FloatingActionButton } from "@/components/FloatingActionButton"
@@ -54,9 +54,8 @@ interface HomeProps {
 }
 
 const Home = ({ initialPageData, initialTeamMembers, initialFeaturedProperties, seoData }: HomeProps) => {
-  const [featuredProperties, setFeaturedProperties] = useState<PropertyData[]>(initialFeaturedProperties)
-  const [filteredProperties, setFilteredProperties] = useState<PropertyData[]>([])
-  const [isFiltering, setIsFiltering] = useState(false)
+  const router = useRouter()
+  const [featuredProperties] = useState<PropertyData[]>(initialFeaturedProperties)
   const [page] = useState<any>(initialPageData)
   const [teamMembers] = useState<any[]>(initialTeamMembers)
   const [filters, setFilters] = useState<FilterState>({
@@ -70,29 +69,20 @@ const Home = ({ initialPageData, initialTeamMembers, initialFeaturedProperties, 
     developer: ""
   })
 
-  // Client-side filtering function
-  const handleFilterSubmit = async () => {
-    setIsFiltering(true)
-    try {
-      const query = new URLSearchParams()
-      if (filters.location) query.append("location", filters.location)
-      if (filters.minPrice) query.append("minPrice", filters.minPrice)
-      if (filters.maxPrice) query.append("maxPrice", filters.maxPrice)
-      if (filters.developer) query.append("developer", filters.developer)
-      if (filters.status) query.append("status", filters.status)
-      if (filters.sale_status) query.append("sale_status", filters.sale_status)
-      if (filters.area) query.append("area", filters.area)
-
-      const response = await fetch(`/api/properties?${query.toString()}`)
-      if (response.ok) {
-        const data = await response.json()
-        setFilteredProperties(data.properties || [])
+  // Handle filter submission by redirecting to properties page
+  const handleFilterSubmit = async (newFilters: FilterState) => {
+    // Create URL parameters from filters
+    const query = new URLSearchParams()
+    
+    Object.entries(newFilters).forEach(([key, value]) => {
+      if (value && value.trim() !== "") {
+        query.append(key, value.trim())
       }
-    } catch (error) {
-      console.error("Error filtering properties:", error)
-    } finally {
-      setIsFiltering(false)
-    }
+    })
+
+    // Redirect to properties page with filters
+    const filterUrl = `/properties${query.toString() ? `?${query.toString()}` : ''}`
+    router.push(filterUrl)
   }
 
   const clearFilters = () => {
@@ -106,11 +96,7 @@ const Home = ({ initialPageData, initialTeamMembers, initialFeaturedProperties, 
       area: "",
       developer: ""
     })
-    setFilteredProperties([])
   }
-
-  const hasActiveFilters = Object.values(filters).some(value => value !== "")
-  const propertiesToShow = hasActiveFilters ? filteredProperties : featuredProperties
 
   return (
     <>
@@ -177,7 +163,7 @@ const Home = ({ initialPageData, initialTeamMembers, initialFeaturedProperties, 
               <PropertyFilters 
                 onFilterSubmit={handleFilterSubmit}
                 onClearFilters={clearFilters}
-                isLoading={isFiltering}
+                isLoading={false}
                 filters={filters}
                 setFilters={setFilters}
               />
@@ -198,34 +184,17 @@ const Home = ({ initialPageData, initialTeamMembers, initialFeaturedProperties, 
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold mb-4">
-                {hasActiveFilters ? "Search Results" : "Featured"} <span className="bg-gradient-to-r from-luxury to-luxury-light bg-clip-text text-transparent">Properties</span>
+                Featured <span className="bg-gradient-to-r from-luxury to-luxury-light bg-clip-text text-transparent">Properties</span>
               </h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                {hasActiveFilters 
-                  ? `Found ${filteredProperties.length} properties matching your criteria`
-                  : "Handpicked selection of Dubai's most prestigious properties"
-                }
+                Handpicked selection of Dubai's most prestigious properties
               </p>
-              {hasActiveFilters && (
-                <Button 
-                  variant="outline" 
-                  onClick={clearFilters}
-                  className="mt-4 border-luxury text-luxury hover:bg-luxury hover:text-white"
-                >
-                  Clear Filters
-                </Button>
-              )}
             </div>
 
-            {isFiltering ? (
-              <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-luxury mx-auto mb-4"></div>
-                <p className="text-muted-foreground">Searching properties...</p>
-              </div>
-            ) : propertiesToShow.length > 0 ? (
+            {featuredProperties.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-                  {propertiesToShow.map((property) => (
+                  {featuredProperties.map((property) => (
                     <PropertyCard key={property.id} property={property} />
                   ))}
                 </div>
@@ -238,27 +207,21 @@ const Home = ({ initialPageData, initialTeamMembers, initialFeaturedProperties, 
                   </Link>
                 </div>
               </>
-            ) : hasActiveFilters ? (
+            ) : (
               <div className="text-center py-12">
                 <div className="max-w-md mx-auto">
-                  <h3 className="text-2xl font-bold mb-4">No Properties Found</h3>
+                  <h3 className="text-2xl font-bold mb-4">Loading Properties...</h3>
                   <p className="text-muted-foreground mb-6">
-                    We couldn't find any properties matching your search criteria. 
-                    Try adjusting your filters or browse all properties.
+                    Please wait while we load our featured properties.
                   </p>
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <Button onClick={clearFilters} variant="outline" className="border-luxury text-luxury hover:bg-luxury hover:text-white">
-                      Clear Filters
+                  <Link href="/properties">
+                    <Button className="bg-gradient-to-r from-luxury to-luxury-light text-white hover:from-luxury-dark hover:to-luxury">
+                      Browse All Properties
                     </Button>
-                    <Link href="/properties">
-                      <Button className="bg-gradient-to-r from-luxury to-luxury-light text-white hover:from-luxury-dark hover:to-luxury">
-                        Browse All Properties
-                      </Button>
-                    </Link>
-                  </div>
+                  </Link>
                 </div>
               </div>
-            ) : null}
+            )}
           </div>
         </section>
 
@@ -539,7 +502,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
         seoData: fallbackSeoData
       }
     }
-  }
-}
+    }
+    }
 
-export default Home;
+    export default Home;
